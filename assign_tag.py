@@ -1,8 +1,5 @@
 import videoTagFetch
-
 import json
-
-
 
 def work(txt):
 
@@ -53,13 +50,15 @@ if __name__ == '__main__':
 
     for video in videos:
         candidates = list()
-        candidates += work(video['title'])
-        candidates += work(video['description'])
-        candidates = unique_list(candidates)
+        candidates += work(video['title'])      # extract keywords from title of each video
+        candidates += work(video['description'])	# extract keywords from description of each video
+        candidates = unique_list(candidates)	# delete the repeated keywords and make sure every keywords is unique 
         showName, showGenre, showType, actors = None, None, None, list()
         for candidate in candidates:
             words = candidate.split()
             found = False
+			# for each keywords, try from the longest keywords to one keyword to fetch the desired tag, 
+			# if the desired tag can be found, stop trying keywords with smaller length 
             for l in range(len(words), 1, -1):
                 for i in range(0, len(words) - l + 1):
                     s = ' '.join(words[i:i + l])
@@ -78,13 +77,13 @@ if __name__ == '__main__':
             for i in range(len(actors)):
                 actors[i] = str(actors[i])
             print '%s, %s' % (showName, actors)
-            if not showName is None:
+            if not showName is None:    # assign the fetched tags to this video
                 video['ShowName'] = showName
                 video['Genre'] = showGenre
                 video['Type'] = showType
                 video['Actors'] = actors
         except:
             print
-
+	# save the assign tags to CodeAssignmentDataSet_new.json
     with open('CodeAssignmentDataSet_new.json', 'w') as outfile:
         json.dump(videos, outfile)

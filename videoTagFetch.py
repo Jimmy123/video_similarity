@@ -3,7 +3,7 @@ import urllib
 import json
 import urlfetch 
  
-
+## fetch show name, Genre, and type of the show from OMDB API
 def fetchVideo_OMDB(videoName):
     # The OMDB API's constant for searching video titles
     # Fetches a video from OMDB API as a Json object
@@ -23,9 +23,9 @@ def fetchVideo_OMDB(videoName):
             return None, None, None
     except:
         return None, None, None
-     
-    # get actors, 
-    
+ 
+
+## fetch the actors/actress for the video if vidoeName(extracted keywords from description and title of the video) if detected as a person's name
 def fetchVideo_DBpedia(videoName):
 
     def is_person(url, response):
@@ -62,8 +62,4 @@ def fetchVideo_DBpedia(videoName):
         return False
     return False
     
-    
-    
-if __name__ == '__main__':
-    print fetchVideo_DBpedia("kate walsh")
-    print fetchVideo_DBpedia("Jodie Foster")
+ 

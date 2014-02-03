@@ -4,10 +4,7 @@ import math
 import re
 import json
 
-
-
 log_v = numpy.vectorize(math.log)
-
 
 def process_all(videos):
     words = list()
@@ -43,7 +40,8 @@ def process_all(videos):
 
 
 def calc_sim(va, vb, videos, word_idx, word_df, words, actors):
-
+	
+	# assign actor vector for video
     def build_actors(video):
         ret = [0.0] * len(actors)
         try:
@@ -52,7 +50,7 @@ def calc_sim(va, vb, videos, word_idx, word_df, words, actors):
         except:
            pass
         return ret
-
+	# assign tf for each term in the document(title and description) for video
     def build_tf(video):
         total_terms = 0.0
         tf = [0.0] * len(word_idx)
@@ -67,34 +65,43 @@ def calc_sim(va, vb, videos, word_idx, word_df, words, actors):
                 pass
         return tf, total_terms
 
-#Get Show Actors Similarity score
+	# get Show Actors similarity score with inner product of two actors' vector
     score_actors = numpy.inner(
             numpy.array(build_actors(va)),
             numpy.array(build_actors(vb)))
-#Get Show Name Similarity Score
+	# get Show Name similarity score 
     try:
         score_name = 1.0 if va['ShowName'] == vb['ShowName'] else 0.0
     except:
         score_name = 0.0
-#Get TFIDF score
+	# get the cosine similarity score of TFIDF between two documents 
     tf_a, total_terms_a = build_tf(va)
     tf_b, total_terms_b = build_tf(vb)
     vector_a = numpy.array(tf_a) / total_terms_a * (-log_v(numpy.array(word_df) / float(len(videos))))
     vector_b = numpy.array(tf_b) / total_terms_b * (-log_v(numpy.array(word_df) / float(len(videos))))
     score_tfidf = numpy.inner(vector_a, vector_b) / (numpy.linalg.norm(vector_a) * numpy.linalg.norm(vector_b))
-    return 0.6 * score_actors + 0.2 * score_name + 0.2 * score_tfidf
+    # get the final similarity score for two videos with weight (0.6, 0.2, 0.2) for Show Actors similarity, 
+	# Show Name similarity and TFIDF cosine similarity
+	return 0.6 * score_actors + 0.2 * score_name + 0.2 * score_tfidf
     
 
 if __name__ == '__main__':
+	# read from the tags assigned data 
     videos = json.load(open("CodeAssignmentDataSet_new.json", "r"))
-    word_idx, word_df, words, actors = process_all(videos)
-    sim_m = numpy.zeros((len(videos), len(videos)))
+	word_idx, word_df, words, actors = process_all(videos)
+    # similarity matrix 
+	sim_m = numpy.zeros((len(videos), len(videos)))
     for i in range(len(videos)):
         for j in range(len(videos)):
             sim_m[i][j] = calc_sim(videos[i], videos[j], videos, word_idx, word_df, words, actors)
         sim_m[i][i] = -1.0
     for i in range(len(videos)):
-        r = list(sorted(zip(sim_m[i], videos), key=lambda x: -x[0]))
-        print videos[i]['title']
-        for item in r[:3]:
-            print '\t' + item[1]['title']
+        # for each video, sort its related videos from final similarity score as descending order
+		r = list(sorted(zip(sim_m[i], videos), key=lambda x: -x[0]))
+        try:
+            print videos[i]['title']
+            # extract the top 3 related videos 
+			for item in r[:3]:
+                print '\t' + item[1]['title']
+        except:
+            pass
