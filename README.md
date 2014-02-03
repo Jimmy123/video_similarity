@@ -13,8 +13,10 @@ This includes three files
 		*output three related videos for each video into related_videos.txt
    
 Dependencies
+
 *The required dependencies is Numpy
 
 To run the program
+
 *python assign_tag.py
 *python calc_sim.py > related_videos.txt
